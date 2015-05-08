@@ -28,6 +28,37 @@ class sale_order(osv.Model):
         'customer_po':fields.char("Customer PO")
     }
 
+class sale_order_line(osv.osv):
+    _inherit = 'sale.order.line'
+
+    def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
+            uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+            lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
+        res = super(sale_order_line, self).product_id_change(cr, uid, ids, pricelist, product, qty=0,
+            uom=False, qty_uos=0, uos=False, name='', partner_id=partner_id,
+            lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=context)
+        if res.get('value'):
+            if res.get('value').get('price_unit'):
+                del res['value']['price_unit']
+        return res
+
+    def _prepare_order_line_invoice_line(self, cr, uid, line, account_id=False, context=None):
+        """Prepare the dict of values to create the new invoice line for a
+           sales order line. This method may be overridden to implement custom
+           invoice generation (making sure to call super() to establish
+           a clean extension chain).
+
+           :param browse_record line: sale.order.line record to invoice
+           :param int account_id: optional ID of a G/L account to force
+               (this is used for returning products including service)
+           :return: dict of values to create() the invoice line
+        """
+        res = super(sale_order_line, self)._prepare_order_line_invoice_line(cr, uid, line, account_id=account_id, context=context)
+        
+        res.update({'part_number': line.part_number, 'internal_part_number' : line.internal_part_number})
+        return res
+
+
 class purchase_order(osv.Model):
     _inherit = "purchase.order"
     def _get_line_product(self, cr, uid, ids, field,arg, context=None):
