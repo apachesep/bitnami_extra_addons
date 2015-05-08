@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <!-- Crm stages -->
+        <record model="crm.case.stage" id="crm.stage_lead3">
+            <field name="name">Needs Quote</field>
+            <field name="case_default">1</field>
+            <field name="probability">20</field>
+            <field name="on_change">1</field>
+            <field name="sequence">40</field>
+            <field name="type">opportunity</field>
+        </record>
+        
+        <record model="crm.case.stage" id="crm.stage_lead4">
+            <field name="name">Quoted</field>
+            <field name="case_default">1</field>
+            <field name="probability">40</field>
+            <field name="sequence">50</field>
+            <field name="type">opportunity</field>
+        </record>
+        
+    </data>
+</openerp>

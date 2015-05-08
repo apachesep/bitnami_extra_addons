@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <report auto="False" 
+                id="sale.report_sale_order" 
+                model="sale.order" 
+                name="sale.order"
+                rml="sale_invocie_discount/sale_order.rml" 
+                string="Quotation / Order"
+                usage="default"/>
+
+        <report
+            auto="False"
+            id="account.account_invoices"
+            model="account.invoice"
+            name="account.invoice"
+            rml="sale_invocie_discount/account_print_invoice.rml"
+            string="Invoices"
+            attachment="(object.state in ('open','paid')) and ('INV'+(object.number or '').replace('/','')+'.pdf')"
+            attachment_use="True"
+            usage="default"
+            />
+
+	<report auto="False" 
+                id="purchase.report_purchase_order" 
+                model="purchase.order" 
+                name="purchase.order"
+                rml="sale_invocie_discount/order.rml" 
+                string="Purchase Order"
+                usage="default"/>
+    </data>
+</openerp>

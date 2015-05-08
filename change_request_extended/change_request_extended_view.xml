@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<record id="res_partner_change_extended" model="ir.ui.view">
+			<field name="name">res.partner.kanban.change.extended</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.res_partner_kanban_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//div[@class='oe_kanban_partner_links']" position="after">
+					<field name="phone"/><br/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="res_partner_form_change_extended" model="ir.ui.view">
+			<field name="name">res.partner.form.change.extended</field>
+			<field name="model">res.partner</field>
+			<field name="inherit_id" ref="base.view_partner_form" />
+				<field name="arch" type="xml">
+					<field name='street2' position="after">
+						<field name="street3"  attrs="{'readonly': [('use_parent_address','=',True)]}"/>
+					</field>
+					<xpath expr="//notebook/page[@string='Sales &amp; Purchases']//field[@name='supplier']" position="after">
+						<field name="minimum_order_value"/>
+						<field name="ups_account_number"/>
+						<field name="fedex_account_number"/>
+					</xpath>
+					<page name="sales_purchases" position="after">
+						<page name="history_tab" string="History">
+							<separator string="Quotation"/>
+							<field name="quotation_ids"/>
+							<separator string="Sales Order"/>
+							<field name="sale_order_line_ids"/>
+							<separator string="Purchase Order"/>
+							<field name="purchase_order_line_ids"/>
+                            <separator string="Customer Invoice"/>
+                            <field name="customer_invoice_ids"/>
+                            <separator string="Supplier Invoice"/>
+                            <field name="supplier_invoice_ids"/>
+						</page>
+					</page>
+				</field>
+		</record>
+        <record id="sale_view_order_form_extended" model="ir.ui.view">
+            <field name="name">sale.order.form.extended</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="arch" type="xml">
+                <field name="partner_id" position="attributes">
+                    <attribute name="on_change">onchange_partner_id(partner_id,context)</attribute>
+                </field>
+                <xpath expr="//notebook/page[@string='Other Information']" position="after">
+                     <page string="Sales &amp; Purchases">
+                        <group>
+	                        <field name="minimum_order_value" class="oe_inline"/>
+	                        <field name="ups_account_number" class="oe_inline"/>
+	                        <field name="fedex_account_number" class="oe_inline"/>
+                        </group>
+                     </page>
+                    </xpath>
+            </field>
+        </record>
+		<record id="crm_form_change_extended" model="ir.ui.view">
+			<field name="name">crm.lead.form.change.extended</field>
+			<field name="model">crm.lead</field>
+			<field name="inherit_id" ref="crm.crm_case_form_view_oppor"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='user_id']" position="after">
+					<field name="need_by_date"/>
+					<field name="internal_part_number"/>
+					<field name="solicitation_number"/>
+				</xpath>
+				<xpath expr="//field[@name='categ_ids']" position="after">
+					<field name="part_number"></field>
+					<field name="quantity"></field>
+					<field name="target_price"></field>
+					<field name="questions_date"></field>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="sale_order_form_change" model="ir.ui.view">
+			<field name="name">sale.order.form.change</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale.view_order_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='order_line']/form//field[@name='price_unit']" position="after">
+					<field name="part_number"/>
+					<field name="internal_part_number"/>
+				</xpath>
+				<xpath expr="//field[@name='order_line']/form//field[@name='address_allotment_id']" position="after">
+					<field name="manufacturer"/>
+					<field name="condition"/>
+					<field name="date_code"/>
+					<field name="rohs"/>
+					<field name="lead_time"/>
+				</xpath>
+				<xpath expr="//field[@name='pricelist_id']" position="after">
+					<field name="customer_po"></field>
+				</xpath>
+			</field>
+		</record>
+
+
+		<record id="sale_stock_order_line_form" model="ir.ui.view">
+			<field name="name">sale.stock.order.line.form</field>
+			<field name="model">sale.order</field>
+			<field name="inherit_id" ref="sale_stock.view_order_form_inherit" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='order_line']/form//field[@name='delay']" position="attributes">
+					<attribute name="required">False</attribute>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="product_form_change_extended" model="ir.ui.view">
+			<field name="name">product.form.change.extended</field>
+			<field name="model">product.ul</field>
+			<field name="inherit_id" ref="product.product_ul_form_view" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='type']" position="replace">
+					<field name="type"></field>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="customer_invoice_form_change_extended" model="ir.ui.view">
+			<field name="name">customer.invoice.form.change.extended</field>
+			<field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.invoice_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='account_id']" position="after">
+					<field name="customer_po"></field>
+				</xpath>
+				<xpath expr="//field[@name='invoice_line']/tree//field[@name='name']" position="after">
+					<field name="internal_part_number"></field>
+					<field name="part_number"></field>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="supplier_invoice_line_tree_change_extended" model="ir.ui.view">
+			<field name="name">supplier.invoice.line.tree.change.extended</field>
+			<field name="model">account.invoice</field>
+			<field name="inherit_id" ref="account.invoice_supplier_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='invoice_line']/tree//field[@name='name']" position="after">
+					<field name="internal_part_number"></field>
+					<field name="part_number"></field>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="account_payment_term_form_change_extended" model="ir.ui.view">
+			<field name="name">account.payment.term.form.change.extended</field>
+			<field name="model">account.payment.term</field>
+			<field name="inherit_id" ref="account.view_payment_term_form" />
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='name']" position="after">
+					<field name="discount"></field>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="change_purchage_order_tree" model="ir.ui.view">
+			<field name="name">change.purchage.order.tree</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.purchase_order_tree"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='origin']" position="after">
+					<field name="anti_receipt_date"/>
+					<field name="lead_time"/>
+					<field name="quantity"/>
+					<field name="produ"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="change_purchage_order_line_form" model="ir.ui.view">
+			<field name="name">change.purchage.order.line.form</field>
+			<field name="model">purchase.order</field>
+			<field name="inherit_id" ref="purchase.purchase_order_form"/>
+			<field name="arch" type="xml">
+				<xpath expr="//field[@name='order_line']/tree//field[@name='product_qty']" position="before">
+					<field name="part_number"/>
+					<field name="internal_part_number"/>
+					<field name="manufacturer"/>
+					<field name="condition"/>
+					<field name="date_code"/>
+					<field name="rohs"/>
+					<field name="lead_time"/>
+				</xpath>
+				<xpath expr="//field[@name='date_order']" position="after">
+					<field name="anti_receipt_date"/>
+					<field name="lead_time"/>
+				</xpath>
+			</field>
+		</record>
+
+		<record id="purchase_order_line_tree_extended" model="ir.ui.view">
+			<field name="name">purchase.order.line.tree.extended</field>
+			<field name="model">purchase.order.line</field>
+			<field name="inherit_id" ref="purchase.purchase_order_line_tree"/>
+			<field name="arch" type="xml">
+			     <xpath expr="//field[@name='product_id']" position="after">
+				    <field name="manfacturer_id"/>
+				    <field name="quote_date"/>
+				</xpath>
+				<xpath expr="//field[@name='state']" position="attributes">
+				    <attribute name="invisible">0</attribute>
+				</xpath>
+			</field>
+		</record>
+        <record id="purchase.purchase_rfq" model="ir.actions.act_window">
+            <field name="name">Requests for Quotation</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">purchase.order</field>
+            <field name="context">{}</field>
+            <field name="domain">[('state','in',('draft','sent','bid','cancel', 'confirmed', 'approved'))]</field>
+            <field name="view_mode">tree,form,graph,calendar</field>
+            <field name="search_view_id" ref="purchase.view_purchase_order_filter"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to create a request for quotation.
+              </p><p>
+                The quotation contains the history of the discussion/negotiation
+                you had with your supplier. Once confirmed, a request for
+                quotation is converted into a purchase order.
+              </p><p>
+                Most propositions of purchase orders are created automatically
+                by Odoo based on inventory needs.
+              </p>
+            </field>
+        </record>
+        <record id="product_supplierinfo_form_view_extended" model="ir.ui.view">
+            <field name="name">product.supplierinfo.form.view.extended</field>
+            <field name="model">product.supplierinfo</field>
+            <field name="inherit_id" ref="product.product_supplierinfo_form_view"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='min_qty']" position="after">
+                    <field name="min_ord_val"/>
+                </xpath>
+            </field>
+        </record>
+        <record id="product_supplierinfo_tree_view_extended" model="ir.ui.view">
+            <field name="name">product.supplierinfo.tree.view.extended</field>
+            <field name="model">product.supplierinfo</field>
+            <field name="inherit_id" ref="product.product_supplierinfo_tree_view"/>
+            <field name="arch" type="xml">
+                 <xpath expr="//field[@name='min_qty']" position="after">
+                    <field name="min_ord_val"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</openerp>
