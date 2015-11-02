@@ -25,9 +25,14 @@ from openerp.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FO
 class res_partner(osv.Model):
     _inherit="res.partner"
 
+#    def _find_child_name(self, cr, uid, ids, field_name, arg, context=None):
+#        res = {}
+#        print '\n function field of partner',field_name,ids,context
+#        return res
+
 
     _columns={
-		'street3':fields.char('street3',size=128),
+        'street3':fields.char('street3',size=128),
         'minimum_order_value':fields.char('Minimum Order Value'),
         'ups_account_number':fields.char('UPS Account Number'),
         'fedex_account_number':fields.char('Fedex Account Number'),
@@ -36,20 +41,21 @@ class res_partner(osv.Model):
         'purchase_order_line_ids': fields.one2many('purchase.order', 'partner_id', 'Sale Order'),
         'customer_invoice_ids':fields.one2many('account.invoice','partner_id','Customer Invoice',domain=[('type','=','out_invoice')]),
         'supplier_invoice_ids':fields.one2many('account.invoice','partner_id','Supplier Invoice',domain=[('type','=','in_invoice')]),
+#        'child_name_kanban': fields.function(_find_child_name, type="char", string="Contacts"),
 
-  	}
+    }
 
 class crm_lead(osv.Model):
     _inherit="crm.lead"
     _columns={
-		'part_number':fields.char('Part Number'),
+        'part_number':fields.char('Part Number'),
         'quantity':fields.char('Quantity'),
-      	'target_price':fields.float('Target Price'),
-	  	'questions_date':fields.date('Questions Date'),
+        'target_price':fields.float('Target Price'),
+        'questions_date':fields.date('Questions Date'),
         'need_by_date':fields.date('Need By Date'),
         'internal_part_number':fields.char('Internal Part Number'),
         'solicitation_number':fields.char('Solicitation Number'),
-	}
+    }
 class sale_order(osv.Model):
     _inherit = 'sale.order'
     _columns = {
@@ -60,7 +66,7 @@ class sale_order(osv.Model):
                }
     def onchange_partner_id(self, cr, uid ,ids, partner_id, context=None):
         if partner_id:
-            res = super(sale_order,self).onchange_partner_id(cr, uid, ids, partner_id,contex)
+            res = super(sale_order,self).onchange_partner_id(cr, uid, ids, partner_id,context=context)
             partnre_read = self.pool.get('res.partner').read(cr,uid, partner_id,['minimum_order_value','ups_account_number','fedex_account_number'],context=context)
             res.get('value').update({
                                      'minimum_order_value':partnre_read.get('minimum_order_value'),
@@ -72,14 +78,41 @@ class sale_order(osv.Model):
 class sale_order_line(osv.Model):
     _inherit="sale.order.line"
     _columns={
-    	'part_number':fields.char('Part Number'),
-    	'internal_part_number':fields.char('Internal Part Number'),
+        'part_number':fields.char('Part Number'),
+        'internal_part_number':fields.char('Internal Part Number'),
         'manufacturer':fields.many2one('res.partner','Manufacturer'),
         'condition':fields.selection([('factory_new','Factory New'),('new_surplus','New Surplus'),('overhauled','Overhauled'),('rebuilt','Rebuilt'),('repaired','Repaired'),('refurbished','Refurbished'),('as_is','As-Is')],'Condition'),
         'date_code':fields.char('Date Code'),
         'rohs':fields.char('RoHS'),
         'lead_time':fields.char('Lead Time' , required=True),
-	}
+    }
+
+    def product_id_change(self, cr, uid, ids, pricelist, product, qty=0,
+            uom=False, qty_uos=0, uos=False, name='', partner_id=False,
+            lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=None):
+        res = super(sale_order_line, self).product_id_change(cr, uid, ids, pricelist, product, qty=0,
+            uom=False, qty_uos=0, uos=False, name='', partner_id=partner_id,
+            lang=False, update_tax=True, date_order=False, packaging=False, fiscal_position=False, flag=False, context=context)
+        if res.get('value'):
+            if res.get('value').get('price_unit'):
+                del res['value']['price_unit']
+        return res
+
+    def _prepare_order_line_invoice_line(self, cr, uid, line, account_id=False, context=None):
+        """Prepare the dict of values to create the new invoice line for a
+           sales order line. This method may be overridden to implement custom
+           invoice generation (making sure to call super() to establish
+           a clean extension chain).
+
+           :param browse_record line: sale.order.line record to invoice
+           :param int account_id: optional ID of a G/L account to force
+               (this is used for returning products including service)
+           :return: dict of values to create() the invoice line
+        """
+        res = super(sale_order_line, self)._prepare_order_line_invoice_line(cr, uid, line, account_id=account_id, context=context)
+        
+        res.update({'part_number': line.part_number, 'internal_part_number' : line.internal_part_number})
+        return res
 
 class product_ul(osv.Model):
     _inherit = "product.ul"
@@ -95,7 +128,7 @@ class product_ul(osv.Model):
 class account_invoice(osv.Model):
     _inherit="account.invoice"
     _columns = {
-    	'customer_po':fields.char("Customer PO")
+        'customer_po':fields.char("Customer PO")
     }
 
     def custom_invoice_print(self, cr, uid, ids, context=None):
@@ -118,18 +151,30 @@ class account_invoice(osv.Model):
 class account_invoice_line(osv.Model):
     _inherit="account.invoice.line"
     _columns={
-    	'internal_part_number':fields.char('Internal Part Number'),
-		'part_number':fields.char('Part Number'),
+        'internal_part_number':fields.char('Internal Part Number'),
+        'part_number':fields.char('Part Number'),
     }
 
 class account_payment_term(osv.Model):
     _inherit="account.payment.term"
     _columns={
-    	'discount':fields.float('Discount'),
+        'discount':fields.float('Discount'),
     }
 
 class purchase_order(osv.Model):
     _inherit = "purchase.order"
+    
+    STATE_SELECTION = [
+        ('draft', 'Draft PO'),
+        ('sent', 'RFQ'),
+        ('confirmed', 'Waiting Approval'),
+        ('approved', 'Purchase Confirmed'),
+        ('except_picking', 'Shipping Exception'),
+        ('except_invoice', 'Invoice Exception'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled')
+    ]
+    
 
     def _quantity_sum(self, cr, uid, ids, field,arg, context=None):
         res = {}
@@ -156,6 +201,17 @@ class purchase_order(osv.Model):
         'anti_receipt_date':fields.date('Anticipated Receipt Date'),
         'lead_time':fields.char('Lead Time'),
         'produ':fields.function(_get_line_product,type = 'char',string='Products'),
+        'state': fields.selection(STATE_SELECTION, 'Status', readonly=True,
+                                  help="The status of the purchase order or the quotation request. "
+                                       "A request for quotation is a purchase order in a 'Draft' status. "
+                                       "Then the order has to be confirmed by the user, the status switch "
+                                       "to 'Confirmed'. Then the supplier must confirm the order to change "
+                                       "the status to 'Approved'. When the purchase order is paid and "
+                                       "received, the status becomes 'Done'. If a cancel action occurs in "
+                                       "the invoice or in the receipt of goods, the status becomes "
+                                       "in exception.",
+                                  select=True, copy=False),
+        
     }
 
 class purchase_order_line(osv.Model):
@@ -172,7 +228,7 @@ class purchase_order_line(osv.Model):
         return res
     _columns = {
         'part_number':fields.char('Part Number'),
-    	'internal_part_number':fields.char('Internal Part Number'),
+        'internal_part_number':fields.char('Internal Part Number'),
         'manufacturer':fields.char('Manufacturer'),
         'condition':fields.selection([('factory_new','Factory New'),('new_surplus','New Surplus'),('overhauled','Overhauled'),('rebuilt','Rebuilt'),('repaired','Repaired'),('refurbished','Refurbished'),('as_is','As-Is')],'Condition'),
         'date_code':fields.char('Date Code'),

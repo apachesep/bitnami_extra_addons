@@ -27,9 +27,14 @@
     """,
     'author': 'BrowseInfo',
     'website': 'http://browseinfo.in',
-    'depends': ['sale'],
+    'depends': ['sale', 'purchase', 'crm', 'product', 'account', 'sale_stock', 'sale_invoice_discount'],
     'data': [
-        'change_request_extended_po_view.xml',
+        'change_request_extended_view.xml',
+        'change_request_extended_data.xml',
+        'report_view.xml',
+        'views/report_invoice.xml',
+        'views/report_purchaseorder.xml',
+        'views/report_saleorder.xml',
     ],
     'demo': [],
     'test': [

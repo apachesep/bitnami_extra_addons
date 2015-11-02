@@ -16,7 +16,7 @@
                             Customer PO :<span t-field="o.customer_po"/><br/>
                         </span>
                         <span t-if="o.name">
-                            Customer Ref:<span t-field="o.name"/>
+                            Customer Ref :<span t-field="o.name"/>
                         </span>
                     </span>
                 </div>

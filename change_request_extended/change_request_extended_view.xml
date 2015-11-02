@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
     <data>
+        <record id="purchase.trans_sent_bid" model="workflow.transition">
+            <field name="act_from" ref="purchase.act_sent"/>
+            <field name="act_to" ref="purchase.act_confirmed"/>
+            <field name="signal">purchase_confirm</field>
+        </record>
 
 		<record id="res_partner_change_extended" model="ir.ui.view">
 			<field name="name">res.partner.kanban.change.extended</field>
@@ -9,6 +14,7 @@
 			<field name="arch" type="xml">
 				<xpath expr="//div[@class='oe_kanban_partner_links']" position="after">
 					<field name="phone"/><br/>
+<!--                    <field name="child_name_kanban" domain="[('is_company', '=', True)]" nolabel="True" attrs="{'invisible': [('is_company', '=', False)]}"/-->
 				</xpath>
 			</field>
 		</record>
@@ -89,7 +95,7 @@
 					<field name="part_number"/>
 					<field name="internal_part_number"/>
 				</xpath>
-				<xpath expr="//field[@name='order_line']/form//field[@name='address_allotment_id']" position="after">
+				<xpath expr="/form/sheet/notebook/page/field/tree/field[@name='name']" position="after">
 					<field name="manufacturer"/>
 					<field name="condition"/>
 					<field name="date_code"/>
@@ -195,6 +201,11 @@
 					<field name="anti_receipt_date"/>
 					<field name="lead_time"/>
 				</xpath>
+				<xpath expr="//header/button[@id='bid_confirm']" position="replace">
+                    <button name="purchase_confirm" states="sent" string="Confirm Order" class="oe_highlight" id="purchase.bid_confirm"/>
+				</xpath>
+                <xpath expr="//header/button[@name='bid_received']" position="replace"/>
+                
 			</field>
 		</record>
 

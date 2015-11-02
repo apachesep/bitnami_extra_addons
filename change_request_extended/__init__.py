@@ -19,6 +19,7 @@
 #
 ##############################################################################
 
-import change_request_extended_po
+import change_request_extended
+import controllers
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
